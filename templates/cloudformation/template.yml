@@ -1,0 +1,197 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: "Deployment template for Books Library Project including S3 for images and DynamoDB for book data."
+
+
+Parameters:
+  ProjectName:
+    Type: String
+    Description: Boos Library Proyecto to test Binary Upload and Database uploads
+  Stage:
+    Type: String
+    Description: Stage of API GATEWAY
+    Default: Prod
+Resources:
+
+  # *** S3 Bucket for Images ***
+  BooksImagesBucket:
+    Type: 'AWS::S3::Bucket'
+    Properties:
+      BucketName: !Sub "morsetest-books-images"
+      PublicAccessBlockConfiguration:
+          BlockPublicAcls: false
+      OwnershipControls:
+        Rules:
+          - ObjectOwnership: ObjectWriter
+      CorsConfiguration:
+        CorsRules:
+          - AllowedHeaders: ["*"]
+            AllowedMethods: ["GET", "PUT", "POST", "DELETE", "HEAD"]
+            AllowedOrigins: ["*"]
+            MaxAge: 3000
+      LoggingConfiguration:
+        DestinationBucketName: !Ref BooksImagesLogsBucket
+        LogFilePrefix: "logs/"
+
+  # *** S3 Bucket for Logs ***
+  BooksImagesLogsBucket:
+    Type: 'AWS::S3::Bucket'
+    Properties:
+      BucketName: !Sub "morsetest-books-images-logs"
+
+  BooksImagesBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref BooksImagesBucket
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Action: 's3:GetObject'
+            Effect: 'Allow'
+            Principal: '*'
+            Resource: !Sub '${BooksImagesBucket.Arn}/books/*'
+          - Action: 's3:ListBucket'
+            Effect: 'Allow'
+            Principal: '*'
+            Resource: !GetAtt BooksImagesBucket.Arn
+
+  # *** KMS Key for DynamoDB and S3 ***
+  GlobalTableKMSKey:
+    Type: 'AWS::KMS::Key'
+    Properties:
+      Description: 'KMS Key for encrypting the StreamTable and S3 Bucket'
+      EnableKeyRotation: true
+      KeyPolicy:
+        Version: '2012-10-17'
+        Id: key-default-1
+        Statement:
+          - Sid: Enable IAM User Permissions
+            Effect: Allow
+            Principal:
+              AWS: !Sub 'arn:aws:iam::${AWS::AccountId}:root'
+            Action: 'kms:*'
+            Resource: '*'
+
+  # *** DynamoDB ***
+  BooksTable:
+    Type: 'AWS::DynamoDB::Table'
+    Properties:
+      TableName: !Sub "${ProjectName}-BooksTable"
+      AttributeDefinitions:
+        - AttributeName: ID
+          AttributeType: S
+      KeySchema:
+        - AttributeName: ID
+          KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+      SSESpecification:
+        SSEEnabled: true
+        SSEType: KMS
+        KMSMasterKeyId: !Ref GlobalTableKMSKey
+
+  # *** API ***
+  BooksApiGateway:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: !Sub "book-storage-api"
+      StageName: !Ref Stage
+      OpenApiVersion: '2.0'
+      Description: API with binary request to store books and images
+      TracingEnabled: true
+      Cors:
+        AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+        AllowMethods: "'OPTIONS,DELETE,GET,HEAD,POST,PUT'"
+        AllowOrigin: "'*'"
+      BinaryMediaTypes: 
+        # - "image~1jpeg"
+        # - "image~1png"
+        - "*/*"
+
+  # *** LAMBDAS ***
+  SaveBookFunction:
+    Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: go1.x
+    Properties:
+      CodeUri: ../../bin/create_book.zip
+      FunctionName: !Sub "${ProjectName}-create_book"
+      Handler: bootstrap
+      Runtime: provided.al2
+      Timeout: 10
+      Environment:
+        Variables:
+          BOOKS_TABLE: !Ref BooksTable
+          BUCKET_NAME: !Ref BooksImagesBucket
+          BUCKET_KEY: !Sub "books/"
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref BooksTable
+        - S3CrudPolicy:
+            BucketName: !Ref BooksImagesBucket
+        - S3WritePolicy:
+            BucketName: !Ref BooksImagesBucket
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - kms:*
+              Resource: !GetAtt GlobalTableKMSKey.Arn
+      Events:
+        SaveBook:
+          Type: Api
+          Properties:
+            Path: /books
+            Method: post
+            RestApiId: !Ref BooksApiGateway
+  
+  UpdateBookFunction:
+    Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: go1.x
+    Properties:
+      CodeUri: ../../bin/update_book.zip
+      FunctionName: !Sub "${ProjectName}-update_book"
+      Handler: bootstrap
+      Runtime: provided.al2
+      Timeout: 10
+      Environment:
+        Variables:
+          BOOKS_TABLE: !Ref BooksTable
+          BUCKET_NAME: !Ref BooksImagesBucket
+          BUCKET_KEY: !Sub "books/"
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref BooksTable
+        - S3CrudPolicy:
+            BucketName: !Ref BooksImagesBucket
+        - S3WritePolicy:
+            BucketName: !Ref BooksImagesBucket
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - kms:*
+              Resource: !GetAtt GlobalTableKMSKey.Arn
+      Events:
+        SaveBook:
+          Type: Api
+          Properties:
+            Path: /books/{bookId}
+            Method: put
+            RestApiId: !Ref BooksApiGateway
+Outputs:
+  BooksTable:
+    Description: Books DynamoDB Table
+    Value: !Ref BooksTable
+
+  BooksImagesBucket:
+    Description: S3 Bucket for storing book images
+    Value: !Ref BooksImagesBucket
+
+  BooksApiGateway:
+    Description: "API Gateway endpoint URL para documentos"
+    Value: !Sub "https://${BooksApiGateway}.execute-api.${AWS::Region}.amazonaws.com/${Stage}"

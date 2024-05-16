@@ -1,0 +1,122 @@
+{
+    "resource": "/books",
+    "path": "/books",
+    "httpMethod": "POST",
+    "headers": {
+        "Accept": "*/*",
+        "Accept-Encoding": "gzip, deflate, br",
+        "CloudFront-Forwarded-Proto": "https",
+        "CloudFront-Is-Desktop-Viewer": "true",
+        "CloudFront-Is-Mobile-Viewer": "false",
+        "CloudFront-Is-SmartTV-Viewer": "false",
+        "CloudFront-Is-Tablet-Viewer": "false",
+        "CloudFront-Viewer-ASN": "6147",
+        "CloudFront-Viewer-Country": "PE",
+        "Content-Type": "application/json",
+        "Host": "mcymym0qua.execute-api.us-east-1.amazonaws.com",
+        "Postman-Token": "153cf1a1-9bf8-4363-98f0-e7d8d6eb3462",
+        "User-Agent": "PostmanRuntime/7.37.3",
+        "Via": "1.1 4c7f37929c014d92eee65d58255828da.cloudfront.net (CloudFront)",
+        "X-Amz-Cf-Id": "yiSNS9XjBcyffh_Tx5_3XM8nBT6Y5cGu7jlTQaGOuxd1eE73EZhYfQ==",
+        "X-Amzn-Trace-Id": "Root=1-661dd429-14f10ac918c773cf1d8760d6",
+        "X-Forwarded-For": "181.66.176.88, 18.68.11.109",
+        "X-Forwarded-Port": "443",
+        "X-Forwarded-Proto": "https"
+    },
+    "multiValueHeaders": {
+        "Accept": [
+            "*/*"
+        ],
+        "Accept-Encoding": [
+            "gzip, deflate, br"
+        ],
+        "CloudFront-Forwarded-Proto": [
+            "https"
+        ],
+        "CloudFront-Is-Desktop-Viewer": [
+            "true"
+        ],
+        "CloudFront-Is-Mobile-Viewer": [
+            "false"
+        ],
+        "CloudFront-Is-SmartTV-Viewer": [
+            "false"
+        ],
+        "CloudFront-Is-Tablet-Viewer": [
+            "false"
+        ],
+        "CloudFront-Viewer-ASN": [
+            "6147"
+        ],
+        "CloudFront-Viewer-Country": [
+            "PE"
+        ],
+        "Content-Type": [
+            "application/json"
+        ],
+        "Host": [
+            "mcymym0qua.execute-api.us-east-1.amazonaws.com"
+        ],
+        "Postman-Token": [
+            "153cf1a1-9bf8-4363-98f0-e7d8d6eb3462"
+        ],
+        "User-Agent": [
+            "PostmanRuntime/7.37.3"
+        ],
+        "Via": [
+            "1.1 4c7f37929c014d92eee65d58255828da.cloudfront.net (CloudFront)"
+        ],
+        "X-Amz-Cf-Id": [
+            "yiSNS9XjBcyffh_Tx5_3XM8nBT6Y5cGu7jlTQaGOuxd1eE73EZhYfQ=="
+        ],
+        "X-Amzn-Trace-Id": [
+            "Root=1-661dd429-14f10ac918c773cf1d8760d6"
+        ],
+        "X-Forwarded-For": [
+            "181.66.176.88, 18.68.11.109"
+        ],
+        "X-Forwarded-Port": [
+            "443"
+        ],
+        "X-Forwarded-Proto": [
+            "https"
+        ]
+    },
+    "queryStringParameters": null,
+    "multiValueQueryStringParameters": null,
+    "pathParameters": null,
+    "stageVariables": null,
+    "requestContext": {
+        "accountId": "681318508133",
+        "resourceId": "5xu9af",
+        "stage": "Prod",
+        "domainName": "mcymym0qua.execute-api.us-east-1.amazonaws.com",
+        "domainPrefix": "mcymym0qua",
+        "requestId": "13e6c67e-bcdd-4de1-9365-3ddeb284dfff",
+        "extendedRequestId": "WS4WfFk3oAMErRw=",
+        "protocol": "HTTP/1.1",
+        "identity": {
+            "cognitoIdentityPoolId": "",
+            "accountId": "",
+            "cognitoIdentityId": "",
+            "caller": "",
+            "apiKey": "",
+            "apiKeyId": "",
+            "accessKey": "",
+            "sourceIp": "181.66.176.88",
+            "cognitoAuthenticationType": "",
+            "cognitoAuthenticationProvider": "",
+            "userArn": "",
+            "userAgent": "PostmanRuntime/7.37.3",
+            "user": ""
+        },
+        "resourcePath": "/books",
+        "path": "/Prod/books",
+        "authorizer": null,
+        "httpMethod": "POST",
+        "requestTime": "16/Apr/2024:01:28:09 +0000",
+        "requestTimeEpoch": 1713230889248,
+        "apiId": "mcymym0qua"
+    },
+    "body": "{\r\n    \"name\": \"club 5 am\"\r\n}"
+}
